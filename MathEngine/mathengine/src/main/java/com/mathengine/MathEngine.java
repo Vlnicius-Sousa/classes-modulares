@@ -290,14 +290,23 @@ public class MathEngine
     // 2° formataExprecao
     /**
      * está função faz a captura dos operadores em seguida faz a adição destes a um array de operadores
+     * ao término faz a captura dos operandos de acordo com a precedencia de operadores.
+     * <br>
+     * cria uma variável chamada subExpressao onde armazena os operandos e operadores de uma expressão. o motivo da criação desta variável
+     * é para representar a precedencia de operações onde cada sub expressão, ou seja, operações entre parenteses recebe seu próprio objeto do tipo
+     * expressão onde contém nele seus operadores e operandos em ordem de execução respeitando precedencia de operadores
      * @param exprecao
      */
     private static void SetoperandoEoperador(String exprecao)
     {
         // set dos operadores
-        Expressao subExpressao = new Expressao();
+        Expressao subExpressao = new Expressao(); // cria um novo objeto do tipo expressão
         int comprimento = exprecao.length();
-
+        /*percorre a expressão em busca de operadores e os aciona a arrays de precedencia
+         * precedenciadeop1 operadores como + e - que são executados por ultimo
+         * precedenciadeop2 operadores como / e * que são executados antes dos operadores de precedencia 1
+         * precedenciadeop3 operadores como ^^ que são executados primeiro antes de operadores de precedencia 2 e 1
+        */
         for (int i = 0; i < comprimento; i++ )
         {
             char caractere = exprecao.charAt(i);
@@ -313,54 +322,76 @@ public class MathEngine
             } 
             
         }
+        // pega a quantidade de operadores encontrados na exprecao
         int operadoresint = precedenciadeop1.size() + precedenciadeop2.size() + precedenciadeop3.size();
+        // faz uma iteração de acordo com a quantidade de operadores encontrados e os adiciona na ordem correta de precedencia 3 a 1, respectivamente
         for(int j = 0; j < operadoresint; j++)
         {
             if(!precedenciadeop3.isEmpty()) subExpressao.operadores.add(precedenciadeop3.remove());
             else if(!precedenciadeop2.isEmpty()) subExpressao.operadores.add(precedenciadeop2.remove());
             else if(!precedenciadeop1.isEmpty()) subExpressao.operadores.add(precedenciadeop1.remove());
         }
+
         // set dos operandos
+        /* as 5 variáveis a baixo são restectivamente
+         * ops = quantidade de operadores
+         * operador = o operador da vez
+         * operando = o numero da vez
+         * novaexprecao = cópia de exprecao para ser alterada, motivo será totalmente preenchida com espaços vazios, acompanhe a lógica abaixo
+         */
         int ops = subExpressao.operadores.size();
         String operador;
         String operando;
         String novaexprecao = exprecao;
 
         char numero;
-
+        // cria iterador de operadores, pois, não pode alterar o array original, subExpressão.operadores
         Iterator<String> iterador = subExpressao.operadores.iterator();
-
+        // enquanto tiver outro elemento no iterador continua
         while(iterador.hasNext()){
+            // recebe o próximo operador
             operador = iterador.next();
+            // recebe o indice da primeira ocorrencia do operador
             int op = novaexprecao.indexOf(operador);
+            // comprimento representa o inicio da string o indice zero para não gerar exceção
             comprimento = 0;
+            // caso o primeiro caractere a esquerda do operador não for um espaço em branco faz o bloco de código, caso contrário pula
             if(!(novaexprecao.charAt(op-1) == ' ')){
+                // esta variável será utilizada para fazer a substring entre o inicio do operador, op, e o inicio do número
                 int tamnhodonumero = op;
                 operando = "";
+                // faz uma iteração decrementando a variável l a partir do primeiro caractere a esquerda do operador até encontrar outro operador
                 for(int l = op-1; l >= comprimento; l--)
                 {
                     numero = novaexprecao.charAt(l);
                     if(Character.isDigit(numero) || numero == '.' || Character.isLetter(numero)){
-                        tamnhodonumero--;
+                        tamnhodonumero--; // caso seja numero ou ponto ou letra decrementa tamanho do numero
                     }else{
-                        break;
+                        break; //s caso ache qualquer coisa a não ser as checadas acima para o loop
                     }
                 }
+                // cria o operando com a substring entre o operador e o inicio do numero, pois, o indice do operador é excluido por conta da função substring sobrando somente o numero
                 operando = exprecao.substring(tamnhodonumero, op);
                 subExpressao.operandos.add(operando);
+                // cria operadorReplace que é a junção do operando e operador
                 String operadorReplace = operando.concat(operador);
+                // chama trocaoperando passando operadorReplace e a própria String novaexprecao para ser alterada retorna uma string com um espaço em branco no lugar do operando
                 novaexprecao = trocaoperando(operadorReplace, novaexprecao);
             }
+            // captura o inicio do numero ao incrementar op, pois, indexof retorna o indice da primeira ocorrencia do operando
             op = novaexprecao.indexOf(operador)+1;
+            //caso o operando tenha mais de um caractere então o incrementa em mais um, sendo assim desde o indice onde ele se encontra será incrementado em mais 2
             if(operador.length() > 1)
             {
-                    op++;
+                op++;
             }
+            // agora o limite de comprimento é o tamanho da string
             comprimento = exprecao.length();
+            // se o caractere a direita do operador não for um espaço em branco executa o bloco de código
             if(!(novaexprecao.charAt(op) == ' ')){
-                
 
                 operando = "";
+                // percorre a expressão a procura de digito, ponto ou letra, para quando chega a qualquer outra coisa
                 for(int h = op; h < comprimento; h++)
                 {
                     numero = novaexprecao.charAt(h);
@@ -374,11 +405,22 @@ public class MathEngine
                 String operadorReplace = operador.concat(operando);
                 novaexprecao = trocaoperando(operadorReplace, novaexprecao);
             }
+            /*  retorna uma string sem o operador, ou seja, percorre a string até achar a primeira ocorrência do operador e o substitui por espaço em branco
+            * isto facilita utilizar indexof para localizar operadores pela expressão
+            */
             novaexprecao = apagaoperador(operador, novaexprecao);
         }
+        // ao terminar a iteração aciona o objeto do tipo expressão ao array de expressões
         expressao.add(subExpressao);
     }
     
+    /**
+     * esta função é chamada internamente por Fazcalculo e faz exatamente o que se propôe. verifica se há alguma coisa no stack de precedencia e então
+     * realiza a troca de parenteses internos por letras e percorre o stack dando pop em cada elemento deste até que esteja vazio.
+     * por fim chama setoperandoEoperador com arrumaprecedencia para transformar quaisquer parenteses em primeiro nível de precedencia em letras.
+     * caso não tenha nenhum parenteses simplesmente chama setoperandoEoperador sobre expression
+     * @param expression a expressão a ser executada
+     */
     private static void formataexprecao (String expression)
     {
         
@@ -447,7 +489,12 @@ public class MathEngine
         return Math.pow(operando1, operando2);
     }
 
-
+    /**
+     * função principal da classe. primeiro chama formataexprecao para preparar o terreno e então entra em um for each por cada elemento do array
+     * expressão
+     * @param expression
+     * @return
+     */
     public static String fazCalculo (String expression)
     {  
         String resultado = new String();
@@ -458,20 +505,27 @@ public class MathEngine
         Double operando2;
         BigDecimal BigOperando1;
         BigDecimal BigOperando2;
+        /*
+         * faz um for each por cada objeto do array expressão e realiza a definição do operando a ser executado e dois operandos
+         * para mais detalhes sobre as funções e arrays de subExpressão consultar Classe: Expresao
+         */
         for(Expressao subExpressao : expressao){
 
             int ops = subExpressao.operadores.size();
     
             for(int i = 0; i < ops; i++)
             {
+                // consultar classe Expressao para mais detalhes sobre as funções abaixo
                 operador =  subExpressao.operadores.remove();
                 operando1 = subExpressao.defineoperando(listaDprecedencia, operador);
                 operando2 = subExpressao.defineoperando(listaDprecedencia, operador);
                 
                 BigOperando1 = BigDecimal.valueOf(operando1);
                 BigOperando2 = BigDecimal.valueOf(operando2);
-    
+                /*faz a verificação do operando e chama a função corespondente */
                 if(operador.equals("^^")){
+                    //diferente de outras operações, a potencia retorna o valor para operandos,
+                    // motivo potencias nada mais são que um for de multiplicação de um mesmo valor por isto não conta como operação e sim como um operando
                     subExpressao.operandos.add(String.valueOf(Potencializa(operando1, operando2)));
                 }
                 else if (operador.equals("*")){
@@ -487,6 +541,10 @@ public class MathEngine
                     subExpressao.resultadoAtual.add(Subtrai(BigOperando1, BigOperando2));
                 }
             }
+            /*
+             * se o resultado atual não estiver vazio o resultado atual é armazenado em listaDprecedencia
+             * caso contrário remove de operandos, este é um caso particular onde apenas uma potencia está em uma expressão
+             */
             if(!subExpressao.resultadoAtual.isEmpty()){
                 listaDprecedencia.add(subExpressao.resultadoAtual.remove());
             }

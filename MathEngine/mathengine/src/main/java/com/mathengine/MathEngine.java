@@ -37,6 +37,7 @@ public class MathEngine
         precedenciadeop3.clear();
         fechaP.clear();
         abreP.clear();
+        listaDprecedencia.clear();
     }
     // trecho abaixo demarcado como trecho 1° relacionado a função isExpression
     /**

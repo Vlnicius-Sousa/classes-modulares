@@ -1,5 +1,7 @@
 package com.mathengine;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -27,6 +29,8 @@ public class MathEngine
 
     private static void termina()
     {
+        novovalor = 'a';
+        expressao.clear();
         precedencia.clear();
         precedenciadeop1.clear();
         precedenciadeop2.clear();
@@ -475,10 +479,11 @@ public class MathEngine
     }
 
     // 3° fazCalculo
-
+    
     private static Double divide (BigDecimal operando1, BigDecimal operando2){
         BigDecimal BigResultado;
-        BigResultado = operando1.divide(operando2);
+        MathContext mc = new MathContext(34 , RoundingMode.DOWN);
+        BigResultado = operando1.divide(operando2, mc);
         return BigResultado.doubleValue();
     }
 
@@ -556,5 +561,12 @@ public class MathEngine
         resultado = Double.toString(listaDprecedencia.getFirst());
         termina();
         return resultado;
+    }
+    public static void main(String[] args) {
+        String expressao = "10/3";
+        String resultado = "não deu certo";
+        if (isexpression(expressao))
+        resultado = fazCalculo(expressao);
+        System.out.println(resultado);
     }
 }

@@ -11,7 +11,12 @@
 
   <name>mathengine</name>
   <url>http://www.example.com</url>
-
+  <repositories>
+    <repository>
+      <id>mathenginerepo</id>
+      <url>https://github.com/Vlnicius-Sousa/classes-modulares/tree/Vlnicius-Sousa-pom-update/MathEngine/mathengine</url>
+    </repository>
+  </repositories>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -32,7 +37,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
+  
   <build>
     <plugins>
       <plugin>
@@ -42,4 +47,5 @@
       </plugin>
     </plugins>
   </build>
+
 </project>

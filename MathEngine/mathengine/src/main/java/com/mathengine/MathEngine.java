@@ -562,11 +562,4 @@ public class MathEngine
         termina();
         return resultado;
     }
-    public static void main(String[] args) {
-        String expressao = "10/3";
-        String resultado = "não deu certo";
-        if (isexpression(expressao))
-        resultado = fazCalculo(expressao);
-        System.out.println(resultado);
-    }
 }
